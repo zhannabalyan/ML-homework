@@ -1,0 +1,57 @@
+#21.Generate a non linear data, and implement a polynomial regression model to
+#fit the data.
+import numpy as np
+import matplotlib.pyplot as plt
+
+#So, first of all, I'm going to generate some random numbers using the np.random.seed, then I'm going to generate random
+#data for x in the range of [-50, 50] using np.random.uniform function.
+#For the last step, I'm going to write some random polynomial( I picked y = 3x^4 - 2x^3 + 7x^2 - 5x + 10)
+
+np.random.seed(1000)
+
+x_vals = np.random.uniform(-30, 30, 100)
+y_vals = 3 * x_vals**4 - 2 * x_vals**3 + 7 * x_vals**2 - 5 * x_vals + 10 
+
+
+#Here I decided to create a design matrix where each column corresponds to powers of x that I used above(x^4, x^3, x^2, x).
+#Then I used the transpose of the design matrix just to be sure that every row of the design matrix corresponds to a data 
+#point with its according polynomial term.
+
+design_matrix = []
+for i in range(4, -1, -1):
+    design_matrix.append(x_vals**i)
+
+design_matrix = np.array(design_matrix).T
+weights = np.random.randn(5) 
+
+#Here I set how much the weights will be updated in each iteration below and also how many times exactly they will be changed.
+learning_rate = 0.00001
+iterations = 1000
+
+#Here, I'm going to perform gradient descent to optimize the weights of the model. 
+#First I computed the predicted outputs for y values, then the difference between those values and the actual ones and finally
+#computed how much each weight will be updated.
+
+for step in range(iterations):
+    
+    output = design_matrix.dot(weights)  
+    
+    loss = output - y_vals
+    
+    grads = (2 / design_matrix.shape[0]) * design_matrix.T.dot(loss)
+    grads = np.clip(grads, -1e10, 1e10)  #this will ensure that gradients don't become too large, without this line I was having
+    #some complications with the output.
+    
+    weights -= learning_rate * grads  
+    
+# Here I used the function polynomial to predict y values for any inputted value of x.
+def polynomial(x_input):
+    input_matrix = np.array([x_input**i for i in range(4, -1, -1)])  
+    return input_matrix.dot(weights)  # Return the p
+
+#random testing
+y_prediction = polynomial(10)
+print(f"The appropriate number predicted for Y for x = 10 will be: {y_prediction:.4f}")
+    
+
+
