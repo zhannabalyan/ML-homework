@@ -1,0 +1,101 @@
+ # 19.Implement Batch Gradient Descent with early stopping for Softmax
+# Regression (without using Scikit-Learn)
+
+import numpy as np 
+
+#The softmax function is used in machine learning to take raw scores and convert them into probabilities. It takes the 
+#exponential form of each output and then divides it by the sum of all those exponentials. So, first, we'll implement that.
+
+def sftmax(x_scores):
+    exp_x = np.exp(x_scores - np.max(x_scores, axis = 1, keepdims = True))
+    # we do this to not have large values in the exponent
+    return exp_x  / np.sum(exp_x, axis = 1, keepdims = True)
+
+#Now, I'll implement the loss function, and there i'll add some small number so that log(0) wouldn't be a problem.
+
+def loss_f(y, y_predicted):
+    
+    mat = y.shape[0]
+    
+    loss = -np.sum(y * np.log(y_predicted + 1e-10)) / mat
+    return loss
+
+#We have learned during our lectures about the one-hot encoding method, which basically converts categorical variables 
+#into binary format. And now we will implement that method here.
+
+def one_h_encode(y_values, n_classes):
+    
+    n_samples = len(y_values)
+    
+    encoded = np.zeros((n_samples, n_classes))
+    
+    encoded[np.arange(n_samples), y_values] = 1
+    
+    return encoded 
+
+
+#Those initial steps are done, so now what's left for us is to implement the batch gradient descent method. It will iterate 
+#through a loop to update the initialized weights using gradients. But in its way it will keep track of the loss and will
+#stop if it doesn't improve for the consecutive iterations.
+
+def b_gradient_descent(x_train, y_values, n_classes, 
+                      learn_rate = 0.1, max_i = 1100, tol=1e-5, patience=10):
+    
+    n_samples, n_features = x_train.shape
+    
+    encoded = one_h_encode(y_values, n_classes)
+    
+    weights = np.random.randn(n_features, n_classes)
+    
+    bias = np.zeros((1, n_classes))
+    
+    best_loss = float('inf')
+    count=0
+    #now here we'll run the iteration I talked about earlier using the weights we defined before
+    
+    for i in range(max_i):
+        raw_outputs = np.dot(x_train, weights) + bias
+        y_pr = sftmax(raw_outputs)
+        
+        loss = loss_f(encoded, y_pr)
+        
+        grad_w = np.dot(x_train.T, (y_pr - encoded)) / n_samples
+        
+        grad_b = np.sum(y_pr - encoded , axis=0, keepdims=True)
+        
+        weights -= learn_rate * grad_w
+        bias -= learn_rate * grad_b
+        
+        if loss < best_loss - tol:
+            best_loss = loss
+            count = 0
+            
+        else:
+            count += 1
+            
+        
+        if count  >= patience:
+            print(f"Stop at iteration {i}")
+            break
+            
+        
+    return weights, bias
+
+
+    
+    
+    
+np.random.seed(57)
+
+x_train = np.random.rand(180, 7)
+y_values = np.random.randint(0, 7, 180)
+W_values, b_values = b_gradient_descent(x_train, y_values, n_classes=7, 
+                                        learn_rate=0.1, max_i=1100, 
+                                        tol=1e-5, patience=10)  
+
+print("Final Weights:", W_values)
+print("Final Biases:", b_values)
+
+
+
+    
