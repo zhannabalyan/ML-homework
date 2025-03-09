@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score
 
 #I'm loading here the MNIST dataset, which contains 784 features. I'm adding the as_frame=False to make sure we have a numpy
 #array that we work with later.
-The as_frame=False parameter indicates we want the data as a NumPy array rather than a pandas DataFrame.
+#The as_frame=False parameter indicates we want the data as a NumPy array rather than a pandas DataFrame.
 mnist = datasets.fetch_openml('mnist_784',
                               
                               version=1, 
