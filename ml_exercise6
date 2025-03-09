@@ -1,0 +1,38 @@
+#24.Generate a non linear data with two classes, and create a logistic regression
+#model using Scikit learn.
+from sklearn.datasets import make_moons
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.linear_model import LogisticRegression
+
+
+#Here we generate 600 data points with two moon-shaped classes.
+#Noise parameter ensures we have randomness, because data in real life is random and this way the model
+#will perform more realistically. Random_state parameter ensures we have reproducibility.
+data_features, data_labels = make_moons(n_samples=600,
+                                        noise=0.25,
+                                        random_state=30)
+
+#Splitting the data into train and test sets again using 80% of the data for training and the rest of it for testing.
+input_train, input_test = train_test_split(features,
+                                           test_size=0.2,
+                                           random_state=30)
+
+output_train, output_test = train_test_split(labels, 
+                                             test_size=0.2,
+                                             random_state=30)
+
+#Normalizing the values using again minmax scaler method.
+normalizer = MinMaxScaler()
+
+input_train = normalizer.fit_transform(input_train)
+
+input_test = normalizer.transform(input_test)
+
+#Creating the regressio and inputting our trained values.
+classifier = LogisticRegression()
+
+classifier.fit(input_train,
+               output_train)
+
+prediction = classifier.predict(input_test)
