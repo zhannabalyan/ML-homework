@@ -1,0 +1,61 @@
+#25. Train an SVM classifier on the MNIST dataset. Since SVM classifiers are
+#binary classifiers, you will need to use one-versus-all to classify all 10 digits.
+#You may want to tune the hyperparameters using small validation sets to
+#speed up the pro‐ cess. What accuracy can you reach?
+
+import numpy as np
+from sklearn import datasets
+from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+
+#I'm loading here the MNIST dataset, which contains 784 features. I'm adding the as_frame=False to make sure we have a numpy
+#array that we work with later.
+The as_frame=False parameter indicates we want the data as a NumPy array rather than a pandas DataFrame.
+mnist = datasets.fetch_openml('mnist_784',
+                              
+                              version=1, 
+                              
+                              as_frame=False)
+
+
+
+#Here we store images data in data_samples and the labels of digits for those images in target_labels, which I later convert
+#into numeric values.
+data_samples, target_labels = mnist.data, mnist.target.astype(np.uint8)
+
+#Here, I create a subset of the data containing 1,200 images and their corresponding labels.
+sample_size = 1200
+
+subset_data = data_samples[:sample_size]
+
+subset_labels = target_labels[:sample_size]
+
+#Here, I split the subset into two parts which are training and testing. I decided to have 6% of the data for testing
+#and the remaining 94% for training. And the stratify function is used to make sure that the training and testing 
+#sets have the same distribution of digit labels.
+
+train_features, test_features, train_labels, test_labels = train_test_split(
+    subset_data, subset_labels,test_size=0.06, stratify=subset_labels, random_state =30
+)
+
+#I'm normalizing the values and once again using MinMax scaler like i have done all the other times before.
+scaler = MinMaxScaler()
+
+train_features_scaled = scaler.fit_transform(train_features)
+
+test_features_scaled = scaler.transform(test_features)
+
+#Here, I create an svm classifier, where the kernel helps to map data to a higher-dimensional space.
+#I did this to make the separation of the data easier.
+svm_classifier = SVC(kernel='rbf', C=100, decision_function_shape='ovr')  
+
+svm_classifier.fit(train_features_scaled, train_labels)
+
+predicted_labels = svm_classifier.predict(test_features_scaled)
+
+test_accuracy = accuracy_score(test_labels, predicted_labels)
+
+print(f"Test accuracy: {test_accuracy:.4f}")
+
